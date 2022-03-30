@@ -27,17 +27,18 @@ class PrioQueue:
         else:
             return False
 
-def solve(pq) :
+def solve(pq, tracker) :
     # If initial node is solution
-    
-    while not pq.isEmpty() :
-        simpul = pq.pop()
+    count = 0
+    while not pq.empty() :
+        simpul = pq.get()
         if (isSolution(simpul[1])) : 
-            printPath(simpul)
-            return
+            printPath(simpul[0], tracker)
+            return count
 
         for move in Directions :
-            if (move.name == getCounterMove(simpul[5])) : continue
+            if (move.name == getCounterMove(simpul[5])) : 
+                continue
             new_tilekosong = [simpul[2][0] + move.value[0], simpul[2][1] + move.value[1]]
             if (isValidMove(new_tilekosong)) :
                 new_matrix = cPickle.loads(cPickle.dumps(simpul[1], -1))
@@ -47,10 +48,13 @@ def solve(pq) :
                 x2 = new_tilekosong[0]
                 y2 = new_tilekosong[1]
                 new_matrix[x1][y1], new_matrix[x2][y2] = new_matrix[x2][y2], new_matrix[x1][y1]
+                if (new_matrix in tracker) :
+                    continue
+                tracker.append(new_matrix)
                 new_cost = countMisplacedTiles(new_matrix)
-                new_simpul = [simpul, new_matrix, new_tilekosong, new_cost, simpul[4] + 1, move]
-
-                pq.push(new_simpul)
+                count += 1
+                new_simpul = [count, new_matrix, new_tilekosong, new_cost, simpul[4] + 1, move]
+                pq.put(new_simpul)
     
 
 # class TreeNode:

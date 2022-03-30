@@ -2,11 +2,15 @@ import random
 
 def inputFileMatrix(filename) :
     matrix = []
-    with open(filename) as f:
-        for line in f:
-            nums = [int(n) for n in line.split()]
-            matrix.append(nums)
-    printMatrix(matrix)
+    try :
+        with open(filename) as f:
+            for line in f:
+                nums = [int(n) for n in line.split()]
+                matrix.append(nums)
+        printMatrix(matrix)
+    except  :
+        print("File tidak ditemukan! Silahkan ulangi kembali!")
+        return "-"
     return matrix
 
 def generateMatrix() :
@@ -28,11 +32,11 @@ def printMatrix(matrix):
             print("%d " % (matrix[i][j]), end = " ")
         print()
 
-def printPath(root):
-    if root == []:
+def printPath(root, tracker):
+    if root == None:
         return
-    printPath(root[0])
-    printMatrix(root[1])
+    # printPath(root[0])
+    printMatrix(tracker[idx])
     print()
 
 def isReachable(matrix) :
