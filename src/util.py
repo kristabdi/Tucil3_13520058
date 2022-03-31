@@ -2,22 +2,22 @@ import random
 import _pickle as cPickle
 
 def unflattenMatrix(matrix) :
-    _matrix = [[-999 for i in range(4)] for i in range(4)]
+    res = [[0 for i in range(4)] for i in range(4)]
     x = 0
     for i in range(4) :
         for j in range(4) :
-            _matrix[i][j] = matrix[x]
+            res[i][j] = matrix[x]
             x += 1
-    return _matrix
+    return res
 
 def flattenMatrix(matrix) :
-    _matrix = [-999 for i in range(16)]
+    res = [0 for i in range(16)]
     x = 0
     for i in range(4) :
         for j in range(4) :
-            _matrix[x] = matrix[i][j]
+            res[x] = matrix[i][j]
             x += 1
-    return _matrix
+    return res
 
 def hashed(matrix):
     res = ""

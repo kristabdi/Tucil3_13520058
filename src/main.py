@@ -24,7 +24,7 @@ def main() :
             sigma = kurangSigma(matrix) + isReachable(matrix)
             print(f'X = {isReachable(matrix)}')
             print(f'Sigma Kurang(i) : {sigma}')
-            print("==========================================================")
+            print("==========================================================", end="")
             # Step 2
             if (sigma % 2 == 0) :
                 now = time.time()
