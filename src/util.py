@@ -21,7 +21,7 @@ def flattenMatrix(matrix) :
 
 def hashed(matrix):
     res = ""
-    symbol = "abcdefghijklmnopqrstuvwxyz"
+    symbol = "abcDEF.;[/']?GHIJKL"
     for element in matrix:
         res += symbol[element]
     return res
