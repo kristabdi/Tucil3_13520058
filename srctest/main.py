@@ -28,11 +28,10 @@ def main() :
             if (sigma % 2 == 0) :
                 now = time.time()
                 puzzle = Puzzle()
-                puzzle.solve(flattenMatrix(matrix))
+                puzzle.solve(matrix)
                 print(f'Waktu yang dibutuhkan untuk menyelesaikan puzzle : {time.time()-now} detik.')
             else :
                 print("Puzzle tidak bisa diselesaikan, gunakan puzzle lain!")
-            # root = TreeNode(None, matrix, tilekosong, initialCost, 0, None)
             state = input("Apakah anda ingin melanjutkan (y/n) ? ")
         else :
             break
@@ -45,30 +44,52 @@ def main() :
 
 def move(matrix, idx, direction):
     res = cPickle.loads(cPickle.dumps(matrix, -1))
+    x = idx[0]
+    y = idx[1]
     if (direction == 0):
-        if ((idx // 4) > 0) :
-            res[idx], res[idx - 4] = res[idx - 4], res[idx]
+        # TOP
+        if (x > 0) :
+            res[x][y], res[x - 1][y] = res[x - 1][y], res[x][y]
             return res
         else :
             return -1
     elif (direction == 1):
-        if ((idx // 4) < 3):
-            res[idx + 4], res[idx] = res[idx], res[idx + 4]
+        # BOTTOM
+        if (x < 3) :
+            res[x][y], res[x + 1][y] = res[x + 1][y], res[x][y]
             return res
         else:
             return -1
     elif (direction == 2):
-        if (idx % 4 > 0):
-            res[idx - 1], res[idx] = res[idx], res[idx - 1]
+        # LEFT
+        if (y > 0):
+            res[x][y], res[x][y - 1] = res[x][y - 1], res[x][y]
             return res
         else:
             return -1
     else :
-        if (idx % 4 < 3):
-            res[idx], res[idx + 1] = res[idx + 1], res[idx]
+        # RIGHT
+        if (y < 3):
+            res[x][y], res[x][y + 1] = res[x][y + 1], res[x][y]
             return res
         else:
             return -1
+
+class PrioQueue:
+    def __init__(self):
+        self.heap = []
+    # Insert new element
+    def push(self, k):
+        heappush(self.heap, k)
+    # Remove minimum element
+    def pop(self):
+        return heappop(self.heap)
+    # Check if the Queue is empty
+    def isEmpty(self):
+        if not self.heap:
+            return True
+        else:
+            return False
 
 class Puzzle :
     def __init__(self) :
@@ -80,7 +101,7 @@ class Puzzle :
         
     def solve(self, initialMatrix) :
         # Create initial node for hashing in dict 
-        hashedMatrix = hashed(initialMatrix)
+        hashedMatrix = hashed(flattenMatrix(initialMatrix))
         indexing = 1
         # Create Dictionary
         # To contain dictionary with hashed matrix as key and number as a value
@@ -95,26 +116,27 @@ class Puzzle :
         self.depthDict[indexing] = 0
 
         # Initialization
-        pq = [(self.costDict[indexing], indexing)]
+        pq = PrioQueue()
+        pq.push((self.costDict[indexing], indexing))
         
         found = False
 
-        while ((pq) and (not found)):
-            cost, nodeIdx = heappop(pq)
+        while ((not pq.isEmpty()) and (not found)):
+            cost, nodeIdx = pq.pop()
 
-            root = self.linkedList[nodeIdx]
-            tilekosong = getTileKosong(root)
+            exploredMatrix = self.linkedList[nodeIdx]
+            tilekosong = getTileKosong(exploredMatrix)
 
             # Create child, move empty tile goes up, down, left, right if valid
             directionMatrix = []
             for i in range(4) :
-                directionMatrix.append(move(root, tilekosong, i))
+                directionMatrix.append(move(exploredMatrix, tilekosong, i))
 
             for matrix in directionMatrix:
                 if (matrix == -1):
                     continue
                 
-                hashedMatrix = hashed(matrix)
+                hashedMatrix = hashed(flattenMatrix(matrix))
                 if (hashedMatrix in self.tracker):
                     # Continue if state of matrix already visited
                     continue
@@ -127,32 +149,36 @@ class Puzzle :
                 self.linkedList[indexing] = matrix
                 # Cost Function
                 self.depthDict[indexing] = self.depthDict[nodeIdx] + 1
-                self.costDict[indexing] = countMisplacedTiles(unflattenMatrix(matrix)) + self.depthDict[indexing]
+                self.costDict[indexing] = countMisplacedTiles(matrix) + self.depthDict[indexing]
                 # Add index to dict of parent index
                 self.parentDict[indexing] = nodeIdx
 
-                if (isSolution(unflattenMatrix(matrix))):
+                if (isSolution(matrix)):
+                    # F.S. indexing is the index of the goal state
                     found = True
                     break
 
-                heappush(pq, (self.costDict[indexing], indexing))
-
+                pq.push((self.costDict[indexing], indexing))
 
         count_simpul = indexing
+        path = indexing
         solution = []
 
         done = False
-        while(not done):
-            solution.append(indexing)
-            if (indexing == 1): done = True
+        
+        while (not done):
+            solution.append(path)
+            if (path == 1): done = True
             # Get linked to parent of each node
-            indexing = self.parentDict[indexing]
+            path = self.parentDict[path]
 
-        solution = solution[::-1]
+        solution = solution[::-1] # Reverse list because tracked from goal state to root
         for i in range(len(solution)):
-            print(f'Langkah ke-{i+1} :')
-            printFlattenedMatrix(self.linkedList[solution[i]])
+            # Print from root to goal state
+            print(f'Simpul ke-{i+1} : ')
+            printMatrix(self.linkedList[solution[i]])
+            # GUI return linkedlist, solution
         print(f'Jumlah simpul yang dibuat : {count_simpul}')
 
-if __name__ == "__main__":
+if __name__ == "__main__" :
     main()
