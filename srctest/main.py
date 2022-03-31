@@ -32,6 +32,7 @@ def main() :
                 print(f'Waktu yang dibutuhkan untuk menyelesaikan puzzle : {time.time()-now} detik.')
             else :
                 print("Puzzle tidak bisa diselesaikan, gunakan puzzle lain!")
+            # root = TreeNode(None, matrix, tilekosong, initialCost, 0, None)
             state = input("Apakah anda ingin melanjutkan (y/n) ? ")
         else :
             break
@@ -39,8 +40,6 @@ def main() :
     print("======================================")
     print("GOODBYE!")
     print("======================================")
-
-
 
 def move(matrix, idx, direction):
     res = cPickle.loads(cPickle.dumps(matrix, -1))
@@ -99,7 +98,7 @@ class Puzzle :
         self.parentDict = {}
         self.depthDict = {}
         
-    def solve(self, initialMatrix) :
+    def branchAndBound(self, initialMatrix) :
         # Create initial node for hashing in dict 
         hashedMatrix = hashed(flattenMatrix(initialMatrix))
         indexing = 1
@@ -124,13 +123,13 @@ class Puzzle :
         while ((not pq.isEmpty()) and (not found)):
             cost, nodeIdx = pq.pop()
 
-            exploredMatrix = self.linkedList[nodeIdx]
-            tilekosong = getTileKosong(exploredMatrix)
+            explore = self.linkedList[nodeIdx]
+            tilekosong = getTileKosong(explore)
 
             # Create child, move empty tile goes up, down, left, right if valid
             directionMatrix = []
             for i in range(4) :
-                directionMatrix.append(move(exploredMatrix, tilekosong, i))
+                directionMatrix.append(move(explore, tilekosong, i))
 
             for matrix in directionMatrix:
                 if (matrix == -1):
@@ -161,24 +160,31 @@ class Puzzle :
                 pq.push((self.costDict[indexing], indexing))
 
         count_simpul = indexing
+        return count_simpul, indexing
+
+    def printPathSolution(self, count_simpul, indexing) :
         path = indexing
         solution = []
-
         done = False
-        
-        while (not done):
+        while(not done):
             solution.append(path)
             if (path == 1): done = True
             # Get linked to parent of each node
             path = self.parentDict[path]
 
-        solution = solution[::-1] # Reverse list because tracked from goal state to root
+
+        solution = solution[::-1]
         for i in range(len(solution)):
             # Print from root to goal state
             print(f'Simpul ke-{i+1} : ')
+            print()
             printMatrix(self.linkedList[solution[i]])
-            # GUI return linkedlist, solution
         print(f'Jumlah simpul yang dibuat : {count_simpul}')
 
-if __name__ == "__main__" :
+    
+    def solve(self, initialMatrix) :
+        count_simpul, idxGoal = self.branchAndBound(initialMatrix)
+        self.printPathSolution(count_simpul, idxGoal)
+
+if __name__ == "__main__":
     main()

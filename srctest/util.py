@@ -32,6 +32,13 @@ def printMatrix(matrix):
             print("%d " % (matrix[i][j]), end = " ")
         print()
 
+def printFlattenedMatrix(matrix):
+    for i in range(len(matrix)):
+        print(matrix[i], end = ' ')
+        if (i % 4 == 3):
+            print("")
+    print("")
+
 def unflattenMatrix(matrix) :
     _matrix = [[-999 for i in range(4)] for i in range(4)]
     x = 0
@@ -52,7 +59,7 @@ def flattenMatrix(matrix) :
 
 def hashed(matrix):
     res = ""
-    symbol = "aBCdEFgHI,;[.]/']?`~!@#$%^&*()_+-=<>|:"
+    symbol = "abcdefghijklmnopqrstuvwxyz"
     for element in matrix:
         res += symbol[element]
     return res
@@ -101,8 +108,13 @@ def countMisplacedTiles(matrix):
                 count += 1
     return count
 
+def getTileKosongFlatten(matrix):
+    for i in range(len(matrix)):
+        if matrix[i] == 16:
+            return i
+
 def getTileKosong(matrix):
     for i in range(len(matrix)):
-        for j in range(len(matrix[i])):
-            if matrix[i][j] == 16:
-                return [i, j]
+        for j in range(len(matrix[i])) :
+            if matrix[i][j] == 16 :
+                return [i,j]
