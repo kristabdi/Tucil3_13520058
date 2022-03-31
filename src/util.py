@@ -32,12 +32,37 @@ def printMatrix(matrix):
             print("%d " % (matrix[i][j]), end = " ")
         print()
 
-def printPath(root, tracker):
-    if root == None:
-        return
-    # printPath(root[0])
-    printMatrix(tracker[idx])
-    print()
+def printFlattenedMatrix(matrix):
+    for i in range(len(matrix)):
+        print(matrix[i], end = ' ')
+        if (i % 4 == 3):
+            print("")
+    print("")
+
+def unflattenMatrix(matrix) :
+    _matrix = [[-999 for i in range(4)] for i in range(4)]
+    x = 0
+    for i in range(4) :
+        for j in range(4) :
+            _matrix[i][j] = matrix[x]
+            x += 1
+    return _matrix
+
+def flattenMatrix(matrix) :
+    _matrix = [-999 for i in range(16)]
+    x = 0
+    for i in range(4) :
+        for j in range(4) :
+            _matrix[x] = matrix[i][j]
+            x += 1
+    return _matrix
+
+def hashed(matrix):
+    res = ""
+    symbol = "abcdefghijklmnopqrstuvwxyz"
+    for element in matrix:
+        res += symbol[element]
+    return res
 
 def isReachable(matrix) :
     solution = [[0,1,0,1],[1,0,1,0],[0,1,0,1],[1,0,1,0]]
@@ -83,24 +108,13 @@ def countMisplacedTiles(matrix):
                 count += 1
     return count
 
+def getTileKosongFlatten(matrix):
+    for i in range(len(matrix)):
+        if matrix[i] == 16:
+            return i
+
 def getTileKosong(matrix):
     for i in range(len(matrix)):
-        for j in range(len(matrix[i])):
-            if matrix[i][j] == 16:
-                return [i, j]
-
-def isValidMove(tilekosong) :
-    x = tilekosong[0]
-    y = tilekosong[1]
-    return (x >= 0 and x < 4 and y >= 0 and y < 4)
-
-def getCounterMove(prev_move) :
-    if (prev_move is None) : return "-"
-    if (prev_move.name == "DOWN") :
-        return "UP"
-    elif (prev_move.name == "UP") :
-        return "DOWN"
-    elif (prev_move.name == "LEFT") :
-        return "RIGHT"
-    else :
-        return "LEFT"
+        for j in range(len(matrix[i])) :
+            if matrix[i][j] == 16 :
+                return [i,j]
