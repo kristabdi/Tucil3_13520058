@@ -1,43 +1,5 @@
 import random
-
-def inputFileMatrix(filename) :
-    matrix = []
-    try :
-        with open(filename) as f:
-            for line in f:
-                nums = [int(n) for n in line.split()]
-                matrix.append(nums)
-        printMatrix(matrix)
-    except  :
-        print("File tidak ditemukan! Silahkan ulangi kembali!")
-        return "-"
-    return matrix
-
-def generateMatrix() :
-    matrix = []
-    choices = [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16]
-    for i in range(4):  
-        arr = []
-        for j in range(4):
-            val = random.choice(choices)
-            arr.append(val)
-            choices.remove(val)
-        matrix.append(arr)
-    printMatrix(matrix)
-    return matrix
-
-def printMatrix(matrix):
-    for i in range(len(matrix)) :
-        for j in range(len(matrix[i])) :
-            print("%d " % (matrix[i][j]), end = " ")
-        print()
-
-def printFlattenedMatrix(matrix):
-    for i in range(len(matrix)):
-        print(matrix[i], end = ' ')
-        if (i % 4 == 3):
-            print("")
-    print("")
+import _pickle as cPickle
 
 def unflattenMatrix(matrix) :
     _matrix = [[-999 for i in range(4)] for i in range(4)]
@@ -108,13 +70,49 @@ def countMisplacedTiles(matrix):
                 count += 1
     return count
 
-def getTileKosongFlatten(matrix):
-    for i in range(len(matrix)):
-        if matrix[i] == 16:
-            return i
-
 def getTileKosong(matrix):
     for i in range(len(matrix)):
         for j in range(len(matrix[i])) :
             if matrix[i][j] == 16 :
                 return [i,j]
+
+
+def move(matrix, idx, direction):
+    res = cPickle.loads(cPickle.dumps(matrix, -1))
+    x = idx[0]
+    y = idx[1]
+    if (direction == 0):
+        # TOP
+        if (x > 0) :
+            res[x][y], res[x - 1][y] = res[x - 1][y], res[x][y]
+            return res
+        else :
+            return -1
+    elif (direction == 1):
+        # BOTTOM
+        if (x < 3) :
+            res[x][y], res[x + 1][y] = res[x + 1][y], res[x][y]
+            return res
+        else:
+            return -1
+    elif (direction == 2):
+        # LEFT
+        if (y > 0):
+            res[x][y], res[x][y - 1] = res[x][y - 1], res[x][y]
+            return res
+        else:
+            return -1
+    else :
+        # RIGHT
+        if (y < 3):
+            res[x][y], res[x][y + 1] = res[x][y + 1], res[x][y]
+            return res
+        else:
+            return -1
+
+def getDirectionList(matrix) :
+    directionMatrix = []
+    tilekosong = getTileKosong(matrix)
+    for i in range(4) :
+        directionMatrix.append(move(matrix, tilekosong, i))
+    return directionMatrix

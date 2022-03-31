@@ -1,21 +1,22 @@
 from heapq import heappop, heappush
-import _pickle as cPickle
 import time
+from inout import *
 from util import *
 
-# Step 1
 def main() :
     state = "y"
     while (state == 'y' or state == 'Y') :
         print("==========================================================")
-        print("15 PUZZLE SOLVER BY 13520058 KRISTO")
+        print("            15 PUZZLE SOLVER BY 13520058 KRISTO           ")
         print("==========================================================")
+        print("Menu : ")
         choice = input("1. Random generate puzzle\n2. Input filename\n3. Exit\nChoose (1/2/3) : ")
         if (choice == '1') :
             matrix = generateMatrix()
         elif (choice == '2') :
-            print("Masukkan filename tes uji dengan format <namafile>.txt")
-            filename = "test/" + input("Input filename (contoh: test.txt): ")
+            print()
+            print("Input Filename Testcase Formatting : <namafile>.txt")
+            filename = "test/" + input("Input filename (example: test.txt): ")
             matrix = inputFileMatrix(filename)
             if (matrix == "-") : exit()
         
@@ -23,56 +24,23 @@ def main() :
             sigma = kurangSigma(matrix) + isReachable(matrix)
             print(f'X = {isReachable(matrix)}')
             print(f'Sigma Kurang(i) : {sigma}')
-            print("==========================================================\n")
+            print("==========================================================")
             # Step 2
             if (sigma % 2 == 0) :
                 now = time.time()
                 puzzle = Puzzle()
                 puzzle.solve(matrix)
-                print(f'Waktu yang dibutuhkan untuk menyelesaikan puzzle : {time.time()-now} detik.')
+                print(f'Elapsed execution time : {time.time()-now} seconds.')
             else :
-                print("Puzzle tidak bisa diselesaikan, gunakan puzzle lain!")
+                print("Puzzle can't be solved, use another puzzle!")
             # root = TreeNode(None, matrix, tilekosong, initialCost, 0, None)
-            state = input("Apakah anda ingin melanjutkan (y/n) ? ")
+            state = input("Do you want to continue (y/n) ? ")
         else :
             break
 
     print("======================================")
-    print("GOODBYE!")
+    print("               GOODBYE!               ")
     print("======================================")
-
-def move(matrix, idx, direction):
-    res = cPickle.loads(cPickle.dumps(matrix, -1))
-    x = idx[0]
-    y = idx[1]
-    if (direction == 0):
-        # TOP
-        if (x > 0) :
-            res[x][y], res[x - 1][y] = res[x - 1][y], res[x][y]
-            return res
-        else :
-            return -1
-    elif (direction == 1):
-        # BOTTOM
-        if (x < 3) :
-            res[x][y], res[x + 1][y] = res[x + 1][y], res[x][y]
-            return res
-        else:
-            return -1
-    elif (direction == 2):
-        # LEFT
-        if (y > 0):
-            res[x][y], res[x][y - 1] = res[x][y - 1], res[x][y]
-            return res
-        else:
-            return -1
-    else :
-        # RIGHT
-        if (y < 3):
-            res[x][y], res[x][y + 1] = res[x][y + 1], res[x][y]
-            return res
-        else:
-            return -1
 
 class PrioQueue:
     def __init__(self):
@@ -97,94 +65,98 @@ class Puzzle :
         self.costDict = {}
         self.parentDict = {}
         self.depthDict = {}
-        
-    def branchAndBound(self, initialMatrix) :
-        # Create initial node for hashing in dict 
-        hashedMatrix = hashed(flattenMatrix(initialMatrix))
-        indexing = 1
-        # Create Dictionary
-        # To contain dictionary with hashed matrix as key and number as a value
-        self.tracker[hashedMatrix] = 1
-        # To contain dictionary with number as key point to a matrix
-        self.linkedList[1] = initialMatrix
-        # To contain depth and cost of each node
-        self.costDict[indexing] = 0 
-        # To contain list of parent of each node
-        self.parentDict[indexing] = indexing
-        # To store depth of each node
-        self.depthDict[indexing] = 0
 
-        # Initialization
+    def solve(self, initialMatrix) :
+        key = self.initialize(initialMatrix)
+        count_simpul, idxGoal = self.branchAndBound(initialMatrix, key)
+        self.printPathSolution(count_simpul, idxGoal)
+
+    def branchAndBound(self, initialMatrix, key) :
+        # Create Priority Queue        
         pq = PrioQueue()
-        pq.push((self.costDict[indexing], indexing))
-        
+        pq.push((self.costDict[key], key))
         found = False
 
         while ((not pq.isEmpty()) and (not found)):
             cost, nodeIdx = pq.pop()
 
             explore = self.linkedList[nodeIdx]
-            tilekosong = getTileKosong(explore)
-
             # Create child, move empty tile goes up, down, left, right if valid
-            directionMatrix = []
-            for i in range(4) :
-                directionMatrix.append(move(explore, tilekosong, i))
+            if (isSolution(explore)):
+                # F.S. key is the index of the goal state
+                found = True
+                break
 
+            directionMatrix = getDirectionList(explore)
             for matrix in directionMatrix:
                 if (matrix == -1):
+                    # Move is invalid (kena ujung)
                     continue
                 
-                hashedMatrix = hashed(flattenMatrix(matrix))
-                if (hashedMatrix in self.tracker):
+                shorted = hashed(flattenMatrix(matrix))
+                if (shorted in self.tracker):
                     # Continue if state of matrix already visited
                     continue
 
                 # New node
-                indexing += 1
+                key += 1
                 # Add to tracker every time a state of matrix visited
-                self.tracker[hashedMatrix] = 1 
+                self.tracker[shorted] = 1 
                 # Add to linked list to store matrix
-                self.linkedList[indexing] = matrix
+                self.linkedList[key] = matrix
                 # Cost Function
-                self.depthDict[indexing] = self.depthDict[nodeIdx] + 1
-                self.costDict[indexing] = countMisplacedTiles(matrix) + self.depthDict[indexing]
+                self.depthDict[key] = self.depthDict[nodeIdx] + 1
+                self.costDict[key] = countMisplacedTiles(matrix) + self.depthDict[key]
                 # Add index to dict of parent index
-                self.parentDict[indexing] = nodeIdx
-
+                self.parentDict[key] = nodeIdx
                 if (isSolution(matrix)):
-                    # F.S. indexing is the index of the goal state
+                    # F.S. key is the index of the goal state
                     found = True
                     break
+                pq.push((self.costDict[key], key))
 
-                pq.push((self.costDict[indexing], indexing))
+        count_simpul = key
+        return count_simpul, key
 
-        count_simpul = indexing
-        return count_simpul, indexing
-
-    def printPathSolution(self, count_simpul, indexing) :
-        path = indexing
+    def printPathSolution(self, count_simpul, key) :
+        path = key
         solution = []
         done = False
-        while(not done):
+        while (not done):
             solution.append(path)
             if (path == 1): done = True
             # Get linked to parent of each node
             path = self.parentDict[path]
-
-
         solution = solution[::-1]
+        listOfMatrixRootToGoal = {}
         for i in range(len(solution)):
-            # Print from root to goal state
-            print(f'Simpul ke-{i+1} : ')
-            print()
-            printMatrix(self.linkedList[solution[i]])
-        print(f'Jumlah simpul yang dibuat : {count_simpul}')
+            listOfMatrixRootToGoal[i] = self.linkedList[solution[i]]
 
-    
-    def solve(self, initialMatrix) :
-        count_simpul, idxGoal = self.branchAndBound(initialMatrix)
-        self.printPathSolution(count_simpul, idxGoal)
+        for i in range(len(listOfMatrixRootToGoal)):
+            # Print from root to goal state
+            print()
+            print()
+            printMatrix(listOfMatrixRootToGoal[i])
+        print(f'\nRaised nodes : {count_simpul}')
+
+        # initialMtrix, return key
+    def initialize(self, initialMatrix) :
+        # Create initial node for hashing in dict 
+        shorted = hashed(flattenMatrix(initialMatrix))
+        key = 1
+        # Create Dictionary
+        # To contain dictionary with hashed matrix as key and number as a value
+        self.tracker[shorted] = 1
+        # To contain dictionary with number as key point to a matrix
+        self.linkedList[1] = initialMatrix
+        # To contain depth and cost of each node
+        self.costDict[key] = countMisplacedTiles(initialMatrix)
+        # To contain list of parent of each node
+        self.parentDict[key] = key
+        # To store depth of each node
+        self.depthDict[key] = 0
+
+        return key
 
 if __name__ == "__main__":
     main()

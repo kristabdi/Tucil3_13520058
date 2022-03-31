@@ -18,16 +18,20 @@ Python 3.7+
 2. Place your .txt file to test folder
 3. Go to src folder and run main.py by writing python main.py in CLI
 
+(NB: Empty tile represented as 16 in testcase file!)
 (NB: choosing random puzzle generator affect the program performance because randomness)
 ```
 
 ## Setup
 After cloning the repository
 ```bash 
+CLI
 cd 15puzzle-solve-bnb
-1. cd src
-2. python main.py
+1. python src/main.py
 3. Choose 1 or 2
 3. If 2, input the filename test you want to solve in test folder
 Solved!
+
+or
+Code Runner in IDE Visual Studio Code
 ```
