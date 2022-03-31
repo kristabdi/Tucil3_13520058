@@ -99,7 +99,6 @@ class Puzzle :
             printMatrix(listOfMatrixRootToGoal[i])
         print(f'\nRaised nodes : {count_simpul}')
 
-        # initialMtrix, return key
     def initialize(self, initialMatrix) :
         # Create initial node for hashing in dict 
         shorted = hashed(flattenMatrix(initialMatrix))
