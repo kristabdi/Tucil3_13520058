@@ -12,17 +12,17 @@ Program dalam Python untuk menyelesaikan persoalan 15-Puzzle dengan menggunakan 
 ```bash
 Python 3.7+
 ```
-## How to Run
+## Setup
 ```bash
 1. Create a .txt file that contains your 15 puzzle matrix (4x4)
 2. Place your .txt file to test folder
-3. Go to src folder and run main.py by writing python main.py in CLI
+3. Go to step how to run below
 
 (NB: Empty tile represented as 16 in testcase file!)
 (NB: choosing random puzzle generator affect the program performance because randomness)
 ```
 
-## Setup
+## How To Run
 After cloning the repository
 ```bash 
 CLI
